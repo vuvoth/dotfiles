@@ -1,0 +1,251 @@
+* Emacs Package Manager
+  #+BEGIN_SRC emacs-lisp
+    (require 'package)
+    (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+    (package-initialize)
+
+    (defvar myPackages
+      '(anaconda-mode
+        darktooth-theme
+        impatient-mode
+        ace-window
+        company
+        nyan-mode
+        doom-modeline 
+        avy
+        company-anaconda
+        company-c-headers
+        ivy
+        counsel-gtags
+        company-quickhelp
+        doom-themes
+        exec-path-from-shell
+        flycheck
+        flycheck-tip
+        ggtags
+        htmlize
+        multiple-cursors
+        org-bullets
+        plan9-theme
+        nlinum-hl
+        pyenv-mode
+        restart-emacs
+        smex
+        swiper
+        switch-window
+        which-key
+        neotree
+        yasnippet
+        indium
+        json-mode
+        highlight-indent-guides))
+
+
+    (mapc #'(lambda (package)
+        (unless (package-installed-p package)
+          (package-install package)))
+          myPackages)
+
+    (when (not package-archive-contents)
+      (package-refresh-contents))
+
+    (when (memq window-system '(mac ns x))
+      (exec-path-from-shell-initialize))
+  #+END_SRC
+* Mac OS keybinding
+#+BEGIN_SRC emacs-lisp
+  (setq mac-command-modifier 'meta)
+  (setq mac-right-command-modifier 'control)
+#+END_SRC
+* Ivy
+#+BEGIN_SRC emacs-lisp 
+
+  (require 'ivy)
+  (ivy-mode 1)
+  (global-set-key (kbd "M-x") 'counsel-M-x)
+
+  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
+
+  (global-set-key (kbd "C-x b") 'counsel-ibuffer)
+
+  (global-set-key (kbd "C-s") 'swiper)
+
+  (defun my/ivy-format-function (cands)
+    "Transform CAND-PAIRS into a string for minibuffer."
+    (ivy--format-function-generic		
+     (lambda (str)
+       (concat " >>> " (ivy--add-face (concat str "\n") 'ivy-current-match)))
+     (lambda (str)
+       (concat "     " str "\n"))
+     cands
+     ""))
+
+  (setq ivy-format-function 'my/ivy-format-function)
+
+
+  (setq counsel-find-file-ignore-regexp
+          (concat
+           ;; File names beginning with # or .
+           "\\(?:\\`[#.]\\)"
+           ;; File names ending with # or ~
+           "\\|\\(?:\\`.+?[#~]\\'\\)"))
+#+END_SRC
+* Emacs Native
+  Emacs UI config
+  #+BEGIN_SRC emacs-lisp
+    (global-visual-line-mode 1)
+    (setq inhibit-startup-screen t)
+    (setq-default frame-title-format "Emacs of vuvoth")
+
+    (when (window-system)
+      (set-frame-position (selected-frame) 5 12)
+      (set-frame-height (selected-frame) 30)
+      (set-frame-width (selected-frame) 120))
+
+    (require 'doom-modeline)
+    (doom-modeline-mode 1)
+    ;; (require 'nyan-mode)
+    ;; (nyan-mode 1)
+
+    (require 'highlight-indent-guides)
+    (add-hook 'python-mode-hook 'highlight-indent-guides-mode)
+    (setq highlight-indent-guides-method 'character)
+    (setq highlight-indent-guides-auto-enabled nil)
+
+    (set-face-background 'highlight-indent-guides-odd-face "darkgray")
+    (set-face-background 'highlight-indent-guides-even-face "dimgray")
+    (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
+
+    (require 'nlinum)
+
+    (visual-line-mode 1) ;; setting line wrap 
+    (load-theme 'darktooth t)
+
+    (add-hook 'prog-mode-hook 'nlinum-mode)
+    (add-hook 'prog-mode-hook 'hl-line-mode)
+
+
+    ;; ;;
+    ;;disable tool bar
+    (tool-bar-mode -1)
+    ;;disable scroll bar
+    (scroll-bar-mode -1)
+
+    (show-paren-mode 1)
+
+    (electric-pair-mode 1)
+
+    ;;(set-language-environment "UTF-8")
+
+    (defalias 'yes-or-no-p 'y-or-n-p)
+
+    (require 'switch-window)
+
+    (global-set-key (kbd "C-x o") 'switch-window)
+
+    (require 'avy)
+    (global-set-key (kbd "C-:") 'avy-goto-char)
+
+    (global-set-key (kbd "C-x C-k") 'kill-buffer-and-window)
+  #+END_SRC
+  Load init.l file shortcut
+  #+BEGIN_SRC emacs-lisp
+    (defun load-init()
+      (interactive)
+      (load "~/.emacs.d/init.el"))
+    (defun load-org-init-file()
+      (interactive)
+      (find-file "~/.emacs.d/config.org"))
+
+    (global-set-key (kbd "C-c m r") 'load-init)
+    (global-set-key (kbd "C-c m e") 'load-org-init-file)
+  #+END_SRC
+  Set font 
+  #+BEGIN_SRC emacs-lisp  
+    (set-face-attribute 'default nil
+			:family "Source Code Pro Medium"
+			:height 130
+			:weight 'normal
+			:width 'normal
+			)
+  #+END_SRC
+* Org mode
+  #+BEGIN_SRC emacs-lisp
+    (require 'org-bullets)
+    (add-hook 'org-mode-hook (lambda ()
+                               (progn
+                                 (org-indent-mode 1)
+                                 (org-bullets-mode 1))))
+    ;;enable python execute
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((python . t)))
+
+  #+END_SRC
+* Company setup 
+  Company completion framework setup
+  #+BEGIN_SRC emacs-lisp
+    (add-hook 'prog-mode-hook 'company-mode)
+    (setq company-idle-delay 0.0)
+    (setq company-minimum-prefix-length 2)
+
+    (global-set-key (kbd "C-c ;") 'company-indent-or-complete-common)
+  #+END_SRC
+* Flycheck 
+  #+BEGIN_SRC emacs-lisp 
+    (add-hook 'c-mode-common-hook 'flycheck-mode)
+    ;; (add-hook 'python-mode-hook 'flycheck-mode)
+  #+END_SRC
+* Yasnippet 
+  #+BEGIN_SRC emacs-lisp
+    (require 'yasnippet)
+    (yas-reload-all)
+    (add-hook 'prog-mode-hook #'yas-minor-mode)
+
+    (with-eval-after-load 'prog-mode
+      (define-key prog-mode-map (kbd "C-;") 'yas/expand)
+      )
+  #+END_SRC
+* C/C++ 
+  #+BEGIN_SRC emacs-lisp
+    (require 'company-c-headers)
+
+    (add-to-list 'company-c-headers-path-system "/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include")
+
+    (push 'company-c-headers company-backends)
+
+  #+END_SRC
+* Python 
+  #+BEGIN_SRC emacs-lisp
+    (add-hook 'python-mode-hook 'anaconda-mode)
+    (add-hook 'python-mode-hook 'anaconda-eldoc-mode)
+
+    (require 'company-anaconda)
+    (push 'company-anaconda company-backends)
+
+    (setq anaconda-mode-localhost-address "localhost")
+
+    (setq python-shell-interpreter "/usr/local/bin/ipython")
+    (setq python-shell-interpreter-args "--simple-prompt -i")
+
+
+  #+END_SRC
+* Html 
+#+BEGIN_SRC emacs-lisp
+  (require 'impatient-mode)
+  (add-hook 'mhtml-mode-hook (lambda ()
+                               (httpd-start)
+                               (impatient-mode 1)))
+#+END_SRC
+* Javascript 
+none complete
+** Indium mode 
+#+BEGIN_SRC emacs-lisp
+  (require 'indium)
+
+
+#+END_SRC
+
+
+
+
