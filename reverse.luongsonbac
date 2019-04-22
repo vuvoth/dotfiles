@@ -1,0 +1,14 @@
+$TTL 86400
+@   IN  SOA     dns.luongsonbac.com. root.luongsonbac.com. (
+        2011071002  ;Serial
+        3600        ;Refresh
+        1800        ;Retry
+        604800      ;Expire
+        86400       ;Minimum TTL
+)
+@       IN  NS          dns.luongsonbac.com.
+@       IN  PTR         luongsonbac.com.
+dns	IN  A		171.30.101.100
+100     IN  PTR         dns.luongsonbac.com.
+100     IN  PTR         www.luongsonbac.com.
+100     IN  PTR         ftp.luongsonbac.com.
